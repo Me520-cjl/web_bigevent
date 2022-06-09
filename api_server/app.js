@@ -12,16 +12,39 @@ const cors = require('cors');
 app.use(cors())
 
 // 配置解析表单数据的中间件，注意：这个中间件，只能解析 application/x-www-form-urlencoded 格式的表单数据
-//导入路由
-// app.use(express.json());
 
 app.use(express.urlencoded({ extended: false }))
 
+
+
+//一定要在路由之前，封装res.cc函数
+app.use((req, res, next) => {
+    //status默认值为1 ，表示失败的情况
+    //err的值，可能是一个错误对象，也可能是一个错误的描述字符串
+    res.cc = function(err, status = 1) {
+        res.send({
+            status,
+            message: err instanceof Error ? err.message : err
+        })
+    }
+    next();
+})
+
+
+
 app.use('/api', usrRouter)
 
-
-
-
+//此中间件要放在路由注册之前
+const joi = require('joi')
+    //错误中间件
+app.use(function(err, req, res, next) {
+    //数据验证错误
+    if (err instanceof joi.ValidationError) {
+        return res.cc(err)
+    }
+    //未知错误
+    res.cc(err)
+})
 
 app.get('/', (req, res) => {
         res.send('Hello World!')
@@ -30,27 +53,3 @@ app.get('/', (req, res) => {
 app.listen(3000, () => {
     console.log('api server runing at http://127.0.0.1:3000');
 })
-
-
-
-
-
-// var http = require('http');
-// http.createServer(function(req, res) {
-//     console.log('hello world' + req.url);
-//     if (req.url === "/favicon.ico") return;
-//     //阻止响应
-//     res.writeHead(200, { 'Content-Type': 'text/plain' });
-//     res.end('Hello world\n');
-// }).listen(3000, '127.0.0.1');
-// console.log('Sever running at http://127.0.0.1:3000/');
-
-// const express = require('express')
-// const app = express()
-// const port = 3000
-
-
-
-// app.listen(port, () => {
-//     console.log(`Example app listening on port ${port}`)
-// })

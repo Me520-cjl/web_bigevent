@@ -7,7 +7,9 @@ exports.regUser = (req, res) => {
     const userinfo = req.body;
     console.log(userinfo);
     if (!userinfo.username || !userinfo.password) {
-        return res.send({ status: 1, messge: '用户名或密码不合法' })
+        // return res.send({ status: 1, messge: '用户名或密码不合法' })
+        return res.cc('用户名或密码不合法');
+
     }
     //res.send('requser OK');
     //定义SQL语句，查询用户名是否被占用
@@ -15,11 +17,13 @@ exports.regUser = (req, res) => {
     db.query(sqlStr, userinfo.username, (err, results) => {
         //判断SQL语句失败
         if (err) {
-            return res.send({ status: 1, messge: err.message })
+            // return res.send({ status: 1, messge: err.message })
+            return res.cc(err)
         }
         //判断用户名是否被占用
         if (results.length > 0) {
-            return res.send({ status: 1, messge: '用户名被占用，请更换其他用户名' })
+            // return res.send({ status: 1, messge: '用户名被占用，请更换其他用户名' })
+            return res.cc('用户名被占用，请更换其他用户名');
         }
         //TODO :用户名可以使用，继续后面的流程调用bcrypt.hashSync()对密码加密
         userinfo.password = bcrypt.hashSync(userinfo.password, 10);
@@ -29,14 +33,17 @@ exports.regUser = (req, res) => {
         db.query(sql, { username: userinfo.username, password: userinfo.password, nickname: userinfo.nickname }, (err, results) => {
             //判断SQL语句失败
             if (err) {
-                return res.send({ status: 1, messge: err.message })
+                // return res.send({ status: 1, messge: err.message })
+                return res.cc(err)
             }
             //SQL语句执行成功，但是影响行数不为1
             if (results.affectedRows !== 1) {
-                return res.send({ status: 1, messge: '注册用户失败，请稍候再试' })
+                // return res.send({ status: 1, messge: '注册用户失败，请稍候再试' })
+                return res.cc('注册用户失败，请稍候再试');
+
             }
             //注册成功
-            res.send({ status: 0, message: '注册成功' });
+            res.cc('注册成功', 0)
         })
     })
 }
