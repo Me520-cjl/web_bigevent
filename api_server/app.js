@@ -1,9 +1,8 @@
 //导入express
 const express = require('express')
 
-//导入并注册用户路由模块
-const usrRouter = require('./router/user')
-    //创建服务器实例
+
+//创建服务器实例
 const app = express();
 
 
@@ -16,7 +15,8 @@ app.use(cors())
 
 app.use(express.urlencoded({ extended: false }))
 
-
+// 托管静态资源文件
+app.use('/uploads', express.static('./uploads'))
 
 //一定要在路由之前，封装res.cc函数
 app.use((req, res, next) => {
@@ -41,8 +41,17 @@ app.use(expressJWT({
     secret: config.jwtSecretKey
 }).unless({ path: [/^\/api/] }))
 
+//导入并注册用户路由模块
+const usrRouter = require('./router/user')
+const userinfoRouter = require('./router/userinfo')
+const artCateRouter = require('./router/artcate')
+const articleRouter = require('./router/article')
+
 //注册路由
 app.use('/api', usrRouter)
+app.use('/my', userinfoRouter)
+app.use('/my', artCateRouter)
+app.use('/my/article', articleRouter)
 
 
 const joi = require('joi')
